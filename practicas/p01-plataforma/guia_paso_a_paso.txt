@@ -1,0 +1,503 @@
+GUÍA PASO A PASO · PRÁCTICA 1
+Plataforma, toolchain y primer firmware
+=======================================
+Basada en el PDF de la práctica. Explicación clara, sin tecnicismos de más.
+Sirve para Windows y Mac.
+
+Documento oficial de la práctica (PDF del curso):
+  archivos_practicas/AISE_7BM1_Practica_01_Plataforma_Toolchain.pdf
+
+
+--------------------------------------------------
+ANTES QUE NADA: ¿qué se hace en esta práctica?
+--------------------------------------------------
+
+NO se carga ni se ejecuta un modelo de inteligencia artificial.
+Eso corresponde a prácticas posteriores del curso.
+
+Lo que SÍ se hace:
+
+1) En la ESP32
+   - Instalar el entorno de desarrollo (Arduino IDE).
+   - Compilar y cargar el firmware de los listados del PDF.
+   - Consultar cuánta memoria tiene la placa y cómo se reparte.
+   - Hacer parpadear un LED a un ritmo controlado (superlazo).
+   - Medir el costo de la operación MAC (multiplicar y acumular),
+     típica en redes neuronales, en float32 e int8.
+   - Esa medición se hace a 3 frecuencias de CPU:
+     240 MHz, 160 MHz y 80 MHz
+     (si la placa es ESP32-C3: solo 160 y 80 MHz).
+   - Además, el Listado 2 (experimento de memoria) se COMPILA
+     3 veces (variantes a, b y c) para ver en qué sección de
+     memoria queda un arreglo de pesos de prueba.
+     No es un modelo real; solo un arreglo para el experimento.
+
+2) En la Raspberry Pi
+   - Dejarla operativa con Linux, Wi‑Fi y acceso por red (SSH).
+   - Ejecutar la misma medición MAC en Python (puro y con NumPy).
+   - Comparar el rendimiento entre la ESP32 y la Raspberry Pi.
+   - Esa Pi se reutiliza después (Práctica 3: broker MQTT;
+     más adelante, visión).
+
+Resumen:
+  ESP32     → instalar toolchain, cargar firmware, medir memoria y MAC.
+  Raspberry → prepararla y comparar rendimiento (ns/MAC) con la ESP32.
+  No es "cargar el modelo 3 veces".
+
+
+--------------------------------------------------
+MATERIAL QUE NECESITAS HOY
+--------------------------------------------------
+
+- Placa ESP32 + cable USB de DATOS (no uno que solo cargue)
+- Protoboard y jumpers (cables Dupont)
+- 1 LED de 5 mm + resistencia 220 Ω
+  (solo si tu placa NO tiene LED de usuario simple;
+   muchas ESP32 clásicas ya lo traen en el GPIO 2;
+   las S3/C3 a veces solo traen LED RGB y sí necesitan el externo)
+- Raspberry Pi 4 o 5 + microSD (≥16 GB) + fuente oficial
+- Tu computadora (Windows o Mac)
+
+Documentación de hardware (consulta según tu placa):
+  ESP32 Series Datasheet (Espressif):
+    https://www.espressif.com/en/support/documents/technical-documents
+  Docs oficiales Raspberry Pi:
+    https://www.raspberrypi.com/documentation/
+  Fuentes oficiales Raspberry Pi:
+    https://www.raspberrypi.com/products/
+
+
+--------------------------------------------------
+PARTE 0 · Seguridad rápida
+--------------------------------------------------
+
+- Los pines GPIO de la ESP32 trabajan a 3.3 V. Nunca les conectes 5 V.
+- El LED externo siempre lleva resistencia en serie (220 Ω).
+- Arma o modifica el circuito CON LA PLACA DESCONECTADA.
+- En la Raspberry Pi usa la fuente oficial.
+- Antes de desconectarla, apágala correctamente:
+    sudo shutdown -h now
+
+Lectura previa recomendada (caps. 8 y 9: procesadores y memoria):
+  Lee & Seshia — Introduction to Embedded Systems:
+    https://leeseshia.org/
+
+
+==================================================
+PASO 1 · Descargar e instalar Arduino IDE
+==================================================
+
+Descarga oficial (Windows y Mac) — usa Arduino IDE 2.3.x:
+  https://www.arduino.cc/en/software
+
+Documentación de Arduino IDE 2:
+  https://docs.arduino.cc/software/ide-v2/
+
+
+--- En Windows ---
+
+1. Entra al link de descarga.
+2. Descarga el instalador "Windows Win 10 and newer".
+3. Ejecútalo e instala con las opciones por defecto.
+4. Abre "Arduino IDE".
+5. Si Windows pide permisos de firewall/red, acéptalos
+   (se usan para descargar paquetes de placas y bibliotecas).
+
+
+--- En Mac ---
+
+1. Entra al mismo link de descarga.
+2. Descarga la versión para macOS
+   (Apple Silicon si tu Mac es M1/M2/M3/M4; Intel si es Intel).
+3. Abre el .dmg y arrastra Arduino IDE a Aplicaciones.
+4. Ábrelo desde Aplicaciones.
+5. Si macOS bloquea la apertura:
+   Ajustes del Sistema → Privacidad y seguridad → Abrir de todos modos.
+
+
+Alternativa (opcional): VS Code + PlatformIO
+  VS Code:
+    https://code.visualstudio.com/
+  Extensión PlatformIO:
+    https://platformio.org/install/ide?install=vscode
+  Para núcleo ESP32 3.x en PlatformIO, la práctica indica usar
+  la plataforma comunitaria pioarduino:
+    https://github.com/pioarduino/platform-espressif32/releases
+
+
+==================================================
+PASO 2 · Agregar soporte para ESP32 en Arduino
+==================================================
+
+Documentación Arduino-ESP32 (Espressif):
+  https://docs.espressif.com/projects/arduino-esp32/
+
+URL del gestor de placas (pegar en Preferencias):
+  https://espressif.github.io/arduino-esp32/package_esp32_index.json
+
+Pasos:
+
+1. Abre Arduino IDE.
+2. Ve a:
+   Arduino IDE → Settings… (Mac)
+   o Archivo → Preferencias (Windows)
+3. En "Additional boards manager URLs" /
+   "Gestor de URLs adicionales de tarjetas" pega la URL de arriba.
+4. Confirma con OK.
+5. Ve a Tools → Board → Boards Manager…
+   (Herramientas → Placa → Gestor de placas…)
+6. Busca: esp32
+7. Instala: "esp32 by Espressif Systems" versión 3.3.x
+   (puede tardar varios minutos).
+
+Cómo comprobar que quedó bien:
+
+1. Archivo → Nuevo (sketch vacío).
+2. Tools → Board → elige tu placa
+   (por ejemplo "ESP32 Dev Module", o el modelo exacto).
+3. Verificar / Compile (✓), SIN cargar a la placa.
+4. Si compila sin error, el toolchain ya está listo.
+5. Anota la versión del núcleo instalada.
+
+Importante: no uses el ejemplo Blink con "ESP32 Dev Module"
+si falla por LED_BUILTIN. Usa los listados del PDF de la práctica.
+
+
+==================================================
+PASO 3 · Drivers USB (si la PC no detecta la placa)
+==================================================
+
+Conecta la ESP32 con el cable USB de datos.
+
+- Windows: debe aparecer un puerto COMx
+  (Tools → Port → COMx).
+- Mac: algo como /dev/cu.usbserial-XXXX o /dev/cu.usbmodemXXXX
+  (Tools → Port).
+
+Si no aparece ningún puerto:
+
+1. Cambia el cable (muchos solo cargan y no transmiten datos).
+2. Prueba otro puerto USB de la computadora.
+3. Instala el driver según el convertidor USB‑serie de tu placa:
+
+   CP210x (Silicon Labs):
+     https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers
+
+   CH340 / CH9102 (WCH) — descargas oficiales:
+     http://www.wch-ic.com/downloads/CH341SER_EXE.html   (Windows)
+     http://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html (Mac)
+     Página general de descargas WCH:
+     http://www.wch-ic.com/downloads/
+
+En Mac, después de instalar el driver, a veces hay que
+permitirlo en Privacidad y seguridad.
+
+
+==================================================
+PASO 4 · Armar el circuito del LED (si hace falta)
+==================================================
+
+Si tu ESP32 YA tiene LED de usuario en el GPIO 2
+(muchas DevKit clásicas), no hace falta armar nada:
+solo conecta la placa por USB.
+
+Si tu placa es ESP32-S3 o ESP32-C3 y no tiene LED simple
+(solo RGB), arma el LED externo en la protoboard.
+
+Referencia de pines ESP32 (DevKit típica):
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html
+
+Piezas:
+  - LED 5 mm
+  - Resistencia 220 Ω
+  - Jumpers
+  - Protoboard
+  - ESP32
+
+Patas del LED:
+  - Pata LARGA = ánodo (+), entra la corriente
+  - Pata CORTA = cátodo (−), va a tierra (GND)
+
+Conexión recomendada (GPIO 2):
+
+  ESP32 GPIO 2  ---- jumper ---->  una punta de la resistencia 220 Ω
+  otra punta de la resistencia -->  pata LARGA del LED (+)
+  pata CORTA del LED (−) -------->  GND de la ESP32
+
+En la protoboard:
+  1. Coloca la ESP32 de forma segura (o usa jumpers desde sus pines).
+  2. Inserta el LED en dos filas distintas.
+  3. La resistencia va en serie entre GPIO 2 y el LED.
+  4. Une la pata corta del LED a una línea GND.
+  5. Une esa línea GND al pin GND de la ESP32.
+  6. Revisa todo ANTES de conectar el USB.
+
+Si usas otro pin libre, cambia en el código:
+  const int LED_PIN = 2;
+por el número de pin que conectaste.
+
+Notas S3 / C3:
+  - Si conectas por el puerto USB nativo del chip, en Arduino activa:
+    Tools → USB CDC On Boot → Enabled
+    Si no, el Monitor Serie no muestra nada.
+  - Guía DevKitC-1 (S3):
+    https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html
+
+
+==================================================
+PASO 5 · Durante la sesión en la ESP32 (Partes A, B, C)
+==================================================
+
+Abre el Monitor Serie a 115200 baud
+(Tools → Serial Monitor, velocidad 115200).
+
+Los códigos están en el PDF de la práctica (Listados 1 a 4).
+Guárdalos en:
+  practicas/p01-plataforma/firmware/
+
+
+----- Parte A · Datos de la placa y memoria (~25 min) -----
+
+1. Conecta la ESP32, selecciona la placa correcta y el puerto.
+2. Carga el Listado 1 (p01_info_plataforma.ino).
+   Si falla con "Failed to connect":
+   mantén BOOT presionado al iniciar la carga.
+3. En el Monitor Serie verás modelo del chip, MHz, flash, heap, etc.
+   Regístralo en la Tabla 4.
+4. Activa salida detallada al compilar:
+   Preferencias → Show verbose output during: compilation
+5. Compila y anota lo que reporta el IDE de memoria.
+6. Con la utilidad size (como indica el PDF) completa la Tabla 5
+   para el Listado 1 (.flash.text, .flash.rodata, etc.).
+7. Listado 2 (p01_memoria.ino):
+   - Compila la versión (a) con const
+   - Luego (b) sin const
+   - Luego (c) sin inicializar
+   Son 3 compilaciones del mismo experimento de memoria,
+   no 3 ejecuciones de un modelo de IA.
+8. Completa la Tabla 5 con esos tres casos.
+
+Referencia de particiones / arranque (Espressif):
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/startup.html
+
+
+----- Parte B · Superlazo y LED (~20 min) -----
+
+1. Usa el Listado 3 (p01_superlazo.ino).
+2. Completa los TODO:
+   - El LED cambia de estado cada 250 ms (2 Hz).
+   - Cada segundo imprime: tiempo, iteraciones y heap libre.
+3. Verifica el periodo del LED (analizador lógico, osciloscopio
+   o video en cámara lenta de ~10 s) → Tabla 6.
+4. Mide iteraciones por segundo en 3 condiciones:
+   (a) tal cual
+   (b) con delay(1) al final de loop()
+   (c) con Serial.printf en cada iteración
+
+
+----- Parte C · Medición MAC (~25 min) -----
+
+Aquí se miden varias configuraciones, pero no se carga un modelo:
+
+1. Carga el Listado 4 (p01_benchmark_mac.ino).
+2. El firmware mide cuánto tarda una operación MAC
+   en float32 y en int8.
+3. Lo hace a distintas frecuencias de CPU:
+   240, 160 y 80 MHz → Tabla 7.
+4. Además, a 240 MHz prueba con N = 256 y N = 4096.
+5. Con esos datos estima cuánto tardaría una capa densa
+   1024×64 (65 536 MAC) en float32 y en int8.
+
+El objetivo es conocer el presupuesto de tiempo/CPU
+antes de desplegar un modelo embebido más adelante.
+
+
+==================================================
+PASO 6 · Preparar la Raspberry Pi
+==================================================
+
+Descarga Raspberry Pi Imager (Windows y Mac):
+  https://www.raspberrypi.com/software/
+
+Documentación de Raspberry Pi OS / Imager:
+  https://www.raspberrypi.com/documentation/computers/getting-started.html
+  https://www.raspberrypi.com/documentation/computers/remote-access.html
+
+
+1. Inserta la microSD en tu computadora
+   (con adaptador si hace falta).
+2. Abre Raspberry Pi Imager.
+3. Elige:
+   - Device: Raspberry Pi 4 o 5 (la tuya)
+   - OS: Raspberry Pi OS Lite (64-bit)
+   - Storage: tu microSD
+4. En personalización (engrane / Edit settings):
+   - Hostname: 7bm1-eqN
+     (N = número de equipo, ej. 7bm1-eq1)
+   - Usuario y contraseña (guárdalos)
+   - Wi‑Fi: preferible la de 2.4 GHz (la usarán en P3)
+   - Zona horaria: America/Mexico_City
+   - Habilitar SSH
+5. Escribe la imagen (Write) y espera a que termine.
+6. Inserta la microSD en la Pi, conecta la fuente oficial y enciende.
+
+
+Actualizar el sistema (recomendado; puede tardar 10–20 min):
+
+  ssh usuario@7bm1-eqN.local
+  sudo apt update && sudo apt full-upgrade -y
+
+
+==================================================
+PASO 7 · Parte D · Medir en la Raspberry y comparar
+==================================================
+
+Documentación SSH en Raspberry Pi:
+  https://www.raspberrypi.com/documentation/computers/remote-access.html#ssh
+
+NumPy (se instala dentro del entorno virtual):
+  https://numpy.org/install/
+
+
+Desde tu computadora:
+
+1. Localiza la Pi en la red:
+     ping 7bm1-eqN.local
+2. Entra por SSH:
+     ssh usuario@7bm1-eqN.local
+   (En Windows 10/11 puedes usar PowerShell o Terminal;
+    SSH ya viene incluido.)
+
+3. Registra datos del sistema (Tabla 8), por ejemplo:
+     cat /proc/device-tree/model; echo; uname -m; nproc
+     free -h; df -h /; vcgencmd measure_temp; hostname -I
+
+4. Copia el script del Listado 6 a la Pi
+   (desde la carpeta donde esté el archivo):
+     scp p01_benchmark_sbc.py usuario@7bm1-eqN.local:~
+
+5. En la Pi, crea el entorno virtual e instala NumPy:
+     sudo apt install -y python3-venv
+     python3 -m venv ~/venv7bm1
+     source ~/venv7bm1/bin/activate
+     pip install numpy
+     python ~/p01_benchmark_sbc.py
+
+6. El script imprime ns/MAC en:
+   - Python puro
+   - NumPy float32
+   - NumPy int8 → int32
+   Eso va a la Tabla 8, junto al valor de la ESP32, para comparar.
+
+7. Guarda la IP de la Pi (hostname -I):
+   la necesitarán en la Práctica 3.
+
+
+¿Para qué es la Raspberry en esta práctica?
+  - Dejarla operativa para el resto del curso.
+  - Ejecutar el mismo cálculo MAC y COMPARARLO con la ESP32.
+  No es medir “tiempos de respuesta de un modelo”;
+  es una comparación de rendimiento base (ns/MAC).
+
+
+==================================================
+PASO 8 · Después de la sesión (entrega)
+==================================================
+
+1. Completar Tablas 4 a 8.
+2. Elaborar la gráfica: ns/MAC vs frecuencia de CPU
+   (float32 e int8 en la misma figura).
+3. Contestar el cuestionario del PDF con los datos propios.
+4. Subir al repositorio en practicas/p01-plataforma/:
+   - README.md (reporte)
+   - firmware/ (códigos)
+   - sbc/ (script y salida)
+   - datos/ (salidas del monitor y de size)
+   - evidencias/ (fotos, captura SSH, video ≤60 s del LED + monitor)
+5. Entrada en bitacora.md (raíz del repo).
+6. Cada integrante debe tener commits significativos.
+
+Git (si aún no lo tienen):
+  https://git-scm.com/downloads
+GitHub:
+  https://github.com/
+
+
+--------------------------------------------------
+ORDEN RÁPIDO DEL DÍA
+--------------------------------------------------
+
+[ ] Instalar Arduino IDE (Win/Mac)
+[ ] Instalar núcleo ESP32 3.3.x
+[ ] Verificar que compile un sketch vacío
+[ ] Cable USB de datos + drivers si hace falta
+[ ] Armar LED solo si la placa no trae LED simple
+[ ] Parte A: Listado 1 y Listado 2 (a/b/c)
+[ ] Parte B: Listado 3 (LED + mediciones)
+[ ] Parte C: Listado 4 (MAC a varias frecuencias)
+[ ] Grabar microSD de la Raspberry con Imager
+[ ] Parte D: SSH + entorno Python + Listado 6
+[ ] Tablas, gráfica, README y evidencias
+
+
+--------------------------------------------------
+LINKS (resumen)
+--------------------------------------------------
+
+Arduino IDE 2:
+  https://www.arduino.cc/en/software
+Docs Arduino IDE 2:
+  https://docs.arduino.cc/software/ide-v2/
+
+URL gestor de placas ESP32:
+  https://espressif.github.io/arduino-esp32/package_esp32_index.json
+Docs Arduino-ESP32:
+  https://docs.espressif.com/projects/arduino-esp32/
+Docs técnicos Espressif (datasheets):
+  https://www.espressif.com/en/support/documents/technical-documents
+Particiones ESP32:
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html
+Arranque / startup ESP32:
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/startup.html
+DevKitC ESP32:
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html
+DevKitC-1 ESP32-S3:
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html
+
+Driver CP210x (Silicon Labs):
+  https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers
+Driver CH340 Windows (WCH):
+  http://www.wch-ic.com/downloads/CH341SER_EXE.html
+Driver CH340 Mac (WCH):
+  http://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html
+Descargas WCH:
+  http://www.wch-ic.com/downloads/
+
+VS Code (alternativa):
+  https://code.visualstudio.com/
+PlatformIO:
+  https://platformio.org/install/ide?install=vscode
+pioarduino (núcleo 3.x en PlatformIO):
+  https://github.com/pioarduino/platform-espressif32/releases
+
+Raspberry Pi Imager:
+  https://www.raspberrypi.com/software/
+Docs Raspberry Pi:
+  https://www.raspberrypi.com/documentation/
+Primeros pasos / Imager:
+  https://www.raspberrypi.com/documentation/computers/getting-started.html
+Acceso remoto / SSH:
+  https://www.raspberrypi.com/documentation/computers/remote-access.html
+Productos / fuentes oficiales:
+  https://www.raspberrypi.com/products/
+
+NumPy:
+  https://numpy.org/install/
+Git:
+  https://git-scm.com/downloads
+GitHub:
+  https://github.com/
+
+Lectura Lee & Seshia (caps. 8 y 9):
+  https://leeseshia.org/
