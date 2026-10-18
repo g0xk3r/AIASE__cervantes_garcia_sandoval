@@ -23,3 +23,6 @@ rev / 100, rev % 100, (unsigned)ESP.getChipCores());
                 mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 void loop() {}
+
+
+"/Users/g0xk3r/Library/Arduino15/packages/esp32/tools/esp-x32/2601/bin/xtensa-esp32-elf-size" -A "/Users/g0xk3r/Library/Caches/arduino/sketches/7F69F89BED3555566C5ADD4AD5B1ABFA/sketch_oct17a.ino.elf"

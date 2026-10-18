@@ -1,0 +1,42 @@
+/Users/g0xk3r/Library/Caches/arduino/sketches/58D2E737482DE5033C62CC5E0579866E/sketch_oct18a.ino.elf  :
+section                 size         addr
+.rtc.text                  0   1074528256
+.rtc.dummy                 0   1073217536
+.rtc.force_fast            0   1073217536
+.rtc_noinit                0   1342177792
+.rtc.force_slow           32   1342177792
+.rtc_fast_reserved        16   1073225712
+.rtc_slow_reserved        24   1342185448
+.iram0.vectors          1028   1074266112
+.iram0.text            62003   1074267140
+.dram0.data            16849   1073470304
+.ext_ram_noinit            0   1065353216
+.noinit                    3   1073487153
+.ext_ram.bss               0   1065353216
+.dram0.bss             21648   1073487160
+.flash.appdesc           256   1061158944
+.flash.rodata          52184   1061159200
+.eh_frame               3592   1061211384
+.flash.text           133320   1074593824
+.iram0.text_end            1   1074329143
+.iram0.data                0   1074329144
+.iram0.bss                 0   1074329144
+.dram0.heap_start          0   1073508808
+.debug_aranges         36568            0
+.debug_info          2358638            0
+.debug_abbrev         301369            0
+.debug_line          1424569            0
+.debug_frame           90792            0
+.debug_str            376332            0
+.debug_loc            462443            0
+.debug_ranges          72744            0
+.debug_line_str        12565            0
+.debug_loclists       114655            0
+.debug_rnglists        11896            0
+.comment                 149            0
+.xtensa.info              56            0
+.xt.prop                2328            0
+.xt.lit                   80            0
+Total                5556140
+
+

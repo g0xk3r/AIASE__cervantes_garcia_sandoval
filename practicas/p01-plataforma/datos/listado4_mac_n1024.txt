@@ -1,0 +1,5 @@
+# Listado 4 · N = 1024 · REPS = 1000
+
+240 MHz | float32:  25.23 ns/MAC,  6.05 ciclos/MAC | int8:  58.68 ns/MAC, 14.08 ciclos/MAC
+160 MHz | float32:  37.92 ns/MAC,  6.07 ciclos/MAC | int8:  88.20 ns/MAC, 14.11 ciclos/MAC
+ 80 MHz | float32:  76.32 ns/MAC,  6.11 ciclos/MAC | int8: 177.46 ns/MAC, 14.20 ciclos/MAC

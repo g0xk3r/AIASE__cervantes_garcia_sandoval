@@ -1,0 +1,6 @@
+# Listado 4 · N = 4096 · 240 MHz (IDE RAM 63188)
+# Último bloque tras Upload
+
+240 MHz | float32:  25.13 ns/MAC,  6.03 ciclos/MAC | int8:  58.59 ns/MAC, 14.06 ciclos/MAC
+160 MHz | float32:  37.77 ns/MAC,  6.04 ciclos/MAC | int8:  88.06 ns/MAC, 14.09 ciclos/MAC
+ 80 MHz | float32:  76.01 ns/MAC,  6.08 ciclos/MAC | int8: 177.17 ns/MAC, 14.17 ciclos/MAC

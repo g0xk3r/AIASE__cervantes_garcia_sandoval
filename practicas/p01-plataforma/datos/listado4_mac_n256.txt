@@ -1,0 +1,6 @@
+# Listado 4 · N = 256 · 240 MHz (IDE RAM 24788)
+# Ignorar bloque previo idéntico a N=1024
+
+240 MHz | float32:  25.60 ns/MAC,  6.14 ciclos/MAC | int8:  59.03 ns/MAC, 14.17 ciclos/MAC
+160 MHz | float32:  38.45 ns/MAC,  6.15 ciclos/MAC | int8:  88.72 ns/MAC, 14.20 ciclos/MAC
+ 80 MHz | float32:  77.39 ns/MAC,  6.19 ciclos/MAC | int8: 178.52 ns/MAC, 14.28 ciclos/MAC

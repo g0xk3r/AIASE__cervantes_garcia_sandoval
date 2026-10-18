@@ -1,0 +1,12 @@
+# Listado 3 (b) · delay(1)
+# Tras Upload / reset — ignorar líneas ~765963 anteriores (eran aún la a)
+
+t=1000 ms  iter/s=991  heap=331780
+t=2000 ms  iter/s=1000  heap=331780
+t=3000 ms  iter/s=1000  heap=331780
+t=4000 ms  iter/s=1000  heap=331780
+t=5000 ms  iter/s=1000  heap=331780
+t=10000 ms  iter/s=1000  heap=331780
+t=15000 ms  iter/s=1000  heap=331780
+t=20000 ms  iter/s=1000  heap=331780
+t=26000 ms  iter/s=1000  heap=331780

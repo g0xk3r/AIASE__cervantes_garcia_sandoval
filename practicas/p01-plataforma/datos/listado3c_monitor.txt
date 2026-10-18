@@ -1,0 +1,8 @@
+# Listado 3 (c) · Serial.printf("x") por iteración
+# Monitor inundado de x; valor estable ~11573 iter/s
+
+t=7006 ms  iter/s=11573  heap=331780
+t=8007 ms  iter/s=11573  heap=331780
+t=9008 ms  iter/s=11572  heap=331780
+t=10010 ms  iter/s=11573  heap=331780
+t=11000 ms  iter/s=11548  heap=331780

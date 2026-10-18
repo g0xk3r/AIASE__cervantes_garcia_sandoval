@@ -1,0 +1,19 @@
+# Listado 3 (a) · p01_superlazo.ino · sin delay
+# Puerto /dev/cu.usbserial-0001 · 115200 baud
+
+t=1000 ms  iter/s=763233  heap=331780
+t=2000 ms  iter/s=765853  heap=331780
+t=3000 ms  iter/s=765966  heap=331780
+t=4000 ms  iter/s=765966  heap=331780
+t=5000 ms  iter/s=765966  heap=331780
+t=6000 ms  iter/s=765965  heap=331780
+t=7000 ms  iter/s=765965  heap=331780
+t=8000 ms  iter/s=765965  heap=331780
+t=9000 ms  iter/s=765965  heap=331780
+t=10000 ms  iter/s=765965  heap=331780
+t=11000 ms  iter/s=765965  heap=331780
+t=12000 ms  iter/s=765965  heap=331780
+t=13000 ms  iter/s=765965  heap=331780
+t=14000 ms  iter/s=765965  heap=331780
+t=15000 ms  iter/s=765965  heap=331780
+t=16000 ms  iter/s=765965  heap=331780

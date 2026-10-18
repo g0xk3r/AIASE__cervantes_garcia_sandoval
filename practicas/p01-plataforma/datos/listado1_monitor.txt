@@ -1,0 +1,11 @@
+# Salida limpia · Listado 1 · p01_info_plataforma.ino
+# Puerto: /dev/cu.usbserial-0001 · 115200 baud
+
+Chip : ESP32-D0WD-V3 v3.1, 2 nucleo(s)
+CPU : 240 MHz
+Flash : 4194304 bytes
+Heap : 377696 total, 331676 libre, bloque max. 110580
+PSRAM : 0 bytes
+Firmware : 274304 bytes (particion OTA siguiente: 1310720)
+Nucleo / IDF : 3.3.12 / v5.5.5
+MAC Wi-Fi (STA): C8:85:41:E3:70:5C
