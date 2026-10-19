@@ -29,7 +29,7 @@ Configurar el toolchain del ESP32, cargar firmware, interpretar uso de memoria y
 - Se usó Arduino IDE 2 con salida verbose para localizar el `.elf` y correr `xtensa-esp32-elf-size -A` (ruta completa bajo `Arduino15/.../esp-x32/...`, no solo el nombre del binario).  
 - Listado 2: tres compilaciones (a/b/c) del arreglo de 16 KiB; el hash de caché del sketch cambia si el archivo no está guardado.  
 - Superlazo: TODOs del PDF completados (impresión a 1 Hz; `delay(1)` y `Serial.printf("x")` medidos y dejados comentados).  
-- Video del iPhone (~603 MB 4K) se re-encodeó a 720p (~5 MB) para caber en GitHub.  
+- Video del iPhone (~154 MB, 4K) se re-encodeó a 720p (~1.7 MB) para caber en GitHub.  
 - **Parte D (Raspberry):** no ejecutada por falta de SBC en el equipo.
 
 Códigos de entrega: carpeta [`firmware/`](firmware/) (un sketch por carpeta). Script SBC: [`sbc/p01_benchmark_sbc.py`](sbc/p01_benchmark_sbc.py). Datos crudos: [`datos/`](datos/).
@@ -114,7 +114,7 @@ Script: [`datos/grafica_ns_mac.py`](datos/grafica_ns_mac.py).
 |---------|-----------|
 | [`evidencias/foto_placa.jpg`](evidencias/foto_placa.jpg) | Placa / montaje |
 | [`evidencias/monitor_ide.png`](evidencias/monitor_ide.png) | Monitor con `iter/s` |
-| [`evidencias/video_led_monitor.mp4`](evidencias/video_led_monitor.mp4) | LED + monitor (~60 s) |
+| [`evidencias/video_led_monitor.mp4`](evidencias/video_led_monitor.mp4) | LED + monitor (~25 s) |
 | [`evidencias/grafica_ns_mac_vs_mhz.png`](evidencias/grafica_ns_mac_vs_mhz.png) | ns/MAC vs MHz |
 
 ## 6. Análisis y cuestionario (PDF §8)
